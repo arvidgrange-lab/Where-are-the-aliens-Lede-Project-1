@@ -1,0 +1,457 @@
+<!-- The originial version of this template was made by Johnathan Soma and then messed with and customized by Aaron Reiss -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    
+    <style>
+
+      #globe { 
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw; 
+        height: 100vh; 
+        z-index: 0; 
+      }
+
+      header, #scrolly {
+        position: relative;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      header *, .step {
+        pointer-events: auto;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: palevioletred;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        max-width: 400px;
+        border-radius: 8px;
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+
+      .modal button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+      }
+      
+      h1{
+        max-width: 50%;
+        margin: 2rem auto 2rem auto;
+        font-family: sans-serif;
+        font-style: italic;
+        text-shadow: 2px 2px 4px rgba(83, 81, 81, 0.5);
+        }
+      
+      p{
+        max-width: 50%;
+        font-family: 'Times New Roman', Times, serif;
+        margin: 1 auto 4rem auto;
+        font-size: 19px;
+        text-shadow: 2px 2px 4px rgb(2, 2, 2);
+        text-align: left;
+        color:rgb(198, 203, 200)
+      }
+      
+      #scrolly {
+        position: relative;
+        padding: 1rem;
+      }
+
+      .scrolly-overlay {
+        position: relative;
+        padding: 0;
+        max-width: 35rem;
+        margin-left: 2px;
+        margin-right: auto;
+        z-index: 10;
+
+      }
+
+      .sticky-thing {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        z-index: 0;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .video-cage {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background-color: #0b0c10;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: 1rem;
+        position: relative;
+        z-index: 1;
+        contain: strict;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+      video {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 6px;
+        margin-top: 1rem;
+        
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+}
+      .step {
+        margin: 0 auto 2rem auto;
+        margin-bottom: 25rem;
+        background-color: #eeeeee00;
+        background-color: #ffffff00;
+        color: rgb(252, 250, 250);
+        text-align: center;
+        border: 3px solid rgba(255, 0, 0, 0);
+
+      }
+
+      .step p {
+        padding: 1rem;
+        font-size: 1.25rem;
+        border: black;
+      }
+
+      #zoomBox {
+        width: 100%;
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+}
+
+      @media only screen and (min-width: 700px) {
+        #scrolly.side-by-side {
+          display: flex;
+        }
+
+        #scrolly.side-by-side > div {
+          flex-basis: 0;
+          flex-grow: 1;
+          flex-shrink: 1;
+          padding: 0.75em;
+        }
+
+        #scrolly.side-by-side .scrolly-overlay {
+          margin-top: 70vh;
+          order: 0;
+          min-width: 15rem;
+          max-width: 20rem;
+        }
+
+        #scrolly.side-by-side .sticky-thing {
+          order: 1;
+          flex-grow: 2;
+        }
+      }
+
+        .sound-button {
+          width: 50px; 
+          cursor: pointer;
+          transition: transform 0.1s ease;
+        }
+
+        .sound-button:active {
+          transform: scale(0.92);
+        }
+
+        .sound-button {
+          width: 150px;
+          cursor: pointer;
+          transition: transform 0.1s ease;
+        }
+
+        .sound-button:active {
+          transform: scale(0.92);
+        }
+
+    </style>
+		<script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/scrollama/3.0.4/scrollama.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.3.0/d3.min.js"></script>
+  </head>
+
+  <body>
+  <div id="globe"></div>
+  <header>
+	<h1>WHERE ARE THE ALIENS?
+    THIS IS WHERE, SAYS THE U.S. DEPARTMENT OF WAR</h1>
+
+  <p></p>
+
+  <p></p>
+</header>
+  
+    
+      <section id="scrolly">
+  <div class="scrolly-overlay">
+
+    <div class="step" id="step1">
+      <p>"What really happened in Roswell?", Barack Obama asked the crowd during the White House correspondents dinner in 2011.<br><br>The president was mocking potus-to-be, Donald Trump, who, in the months prior, had claimed that Barack Obama was born outside the United States.<br><br>As the birth certificate had finally been released by the state of Hawaii, "The Donald" could move on to more important questions, Obama joked.<br><br>Such as getting to the bottom of the infamous 1947 UFO incident in Roswell.</p>
+    </div>
+
+    <div class="step" id="step_seems_he_has">
+      <p">It seems he has.</p>
+    </div>
+
+    <div class="step" id="step-nyt">
+      <p">While Donald Trump’s “birther” conspiracy has largely been if not forgotten, at least discarded, the UFO phenomenon has instead gone increasingly mainstream over the past decade – gaining not only attention, but also legitimacy.<br><br>After an article in the New York Times in 2017, exposing a previously unknown U.S government program focused on gaining intelligence on UFOs, or <i>UAP:s</i> (unidentified anomalous phenomena), perception has changed radically from tin foil nut-crackery to serious debate.</p>
+      <img src="glowing auras ehadline.png" style="width: 100%; max-width: 320px; margin: 1.5rem auto; display: block; border-radius: 4px;">
+      <div class="video-cage">
+      <video style="width: 100%; height: auto; border-radius: 6px; margin-top: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.8);" playsinline preload="metadata" controls>
+        <source src="uap_vid_NYT_cut.mp4" type="video/mp4" />
+      </video>
+    </div>
+     <p">To quote then head of NASA, Bill Nelson, from a press conference in 2023. “We don’t know what these UAP are”, Nelson said, adding that they are one of our planet's most profound mysteries.<br><br>And now, this spring, The Donald has taken Obama’s advice and declassified previously top-secret documents about the UFO-mystery.</p>
+     <img src="bill_nelson.jpg" style="width: 30%; max-width: 360px; margin: 0 rem auto; display: block; border-radius: 4px;">
+     <p style="font-size: x-small;">Bill Nelson, former head of NASA.</style></p>
+    </div>
+  
+    <div class="step" id="map_intro">
+      <p>This map contains the locations of the UFO incidents published on the Department of War’s website. The size of the UFOs on the map corresponds to the number of incidents in that location.</p>
+      <img src="uforeportscounts.png" style="width: 100%; max-width: 600px; margin: 0 rem auto; display: block; border-radius: 4px;">
+    </div>
+
+    <div class="step" id="step2">
+      <p>The incidents reported are from all over the world.<br><br>Such as this sighting, at Harare International Airport in Zimbabwe, in 2008<br><br>According to the newly released CIA memo, observers saw the object hovering over the airport for some time, with "beams" emanating from it.</p>
+    </div>
+
+          <div class="step" id="step3">
+            <p>Many of the sightings – 25 out of the 74 posted on the DOW's website – are in the middle east.<br><br>Like two separate sightings in 2020 by U.S military personel, only one month apart, in the straight of Hormuz.<br><br>Although the incident locations released by the Department of war are interesting, they don't necessarily prove a global alien diaspora. But at the very least they show a systematic and serious categorizing of UAP events by the U.S military all over the globe.<br><br>This video of a UAP was captured in the "Middle East" in 2013 by an infrared sensor aboard a U.S military platform, according to the United States government.</p>
+            <div class="video-cage">
+            <video style="width: 100%; height: auto; border-radius: 6px; margin-top: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.8);" playsinline preload="metadata" controls>
+              <source src="middle_east_2013.mp4" type="video/mp4" />
+            </video>
+          </div>
+          </div>
+
+
+    <div class="step" id="step4">
+      <p>Many of the documents released do not have incident locations published directly on the Department of War's website but still have the locations unredacted inside the files. These files include sightings from the better half of the previous century until present, in places like Argentina, Holland, Madagascar, and Sweden.<br><br>Most interesting might not even be these incidents around the globe, though. Several of the incidents published actually happened… not on earth. Two were reported by astronauts from the moon.</p>
+    </div>
+
+    <div class="step" id="step5">
+      <p>And these three reports from Cape Kennedy in Florida were not sightings made from earth either. They are crew debriefings at the Kennedy Space Center with astronauts from the NASA Gemini space missions.<br><br>The conversation between astronaut Frank Borman, of Gemini mission 7, and ground control, was recorded and has been published alongside the documents.<br><br>Borman reports seeing a “bogey” – a pilot slang for unidentified aircraft – while in space.<br><br>Click the Gemini 7 space shuttle below to listen to the recording.</p>
+      <audio id="gemini_audio">
+     <source src="gemini_trasc_cut2.mp3" type="audio/mpeg">
+    </audio>
+    <img src="gemini_play_icon.png" id="audioTrigger" alt="Play recording" class="sound-button" style="margin-left: -250px;">
+    </div>
+
+
+    <!-- Mobile Warning Modal -->
+    <div id="deviceModal" class="modal">
+      <div class="modal-content">
+        <span>
+          Sadly, this site is meant to be viewed on a computer, so if you are on a phone or tablet then it's gonna look all kinds of wonky and you might get the wrong impression about how amazing this work is.
+        </span>
+        <button id="continueBtn">Continue Anyway</button>
+      </div>
+    </div>
+
+<script>
+
+/* Scrollytelling code goes under here */
+
+  // Put the key in here
+      mapboxgl.accessToken = "pk.eyJ1IjoiYXJ2aWRncmFuZ2UiLCJhIjoiY21xaXZtZjA4MGJlMjJ4cTZ2ODV2OXI3MCJ9.1o80V48800HlPBsR0kgVog";
+
+      //Deactivate scrollzoom
+      const map = new mapboxgl.Map({
+          container: 'globe', 
+          style: 'mapbox://styles/mapbox/dark-v11', 
+          center: [15, 30],   
+          zoom: 1.2,          
+          projection: 'globe',
+          scrollZoom: false
+
+      });
+//Get sum cool space-vibe going
+      map.on('style.load', () => {
+          map.setFog({
+            "star-intensity": 0.10
+          });
+      });
+          
+      
+
+      // we gon fix rotation speed
+      const secondsPerRevolution = 180; 
+      function rotateCamera() {
+          if (map.getZoom() < 4) {
+              const rotateNumber = 360 / secondsPerRevolution;
+              const center = map.getCenter();
+              center.lng -= rotateNumber;
+              map.easeTo({ center, duration: 1000, easing: (n) => n });
+          }
+      }
+
+      map.on('load', () => {
+        map.getStyle().layers.forEach((layer) => {
+        if (layer.type === 'symbol') {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+        }
+    });
+
+       fetch('coords_counts_fixed.geojson')
+    .then(response => response.json())
+    .then((uapData) => {
+        
+        uapData.features.forEach((feature) => {
+            const count = feature.properties.duplicate_count || 1;
+            
+            const size = 16 + (count * 6); 
+
+            const el = document.createElement('div');
+            el.className = 'custom-uap-marker';
+          
+            el.innerHTML = `<img src="ufomarker.svg" width="${size}" height="${size}">`;
+
+            new mapboxgl.Marker(el)
+                .setLngLat(feature.geometry.coordinates)
+                .setPopup(
+                    new mapboxgl.Popup({ offset: 10 })
+                    .setHTML(`<h3>${feature.properties.location}</h3><p>Sightings: ${count}</p>`)
+                )
+                .addTo(map);
+        });
+
+    })
+    .catch(error => console.error('Error loading GeoJSON:', error));
+
+
+           map.setLayoutProperty('admin-0-boundary', 'visibility', 'none');
+
+           map.setLayoutProperty('admin-0-boundary-disputed', 'visibility', 'none');
+
+           map.setLayoutProperty('continent-label', 'visibility', 'none');
+
+           map.setLayoutProperty('country-label', 'visibility', 'none');
+
+           map.setLayoutProperty('water-point-label', 'visibility', 'none');
+
+
+          rotateCamera();
+          window.spinTimer = setInterval(rotateCamera, 1000);
+      });
+
+  d3.select("#step1").on('stepin', () => {
+    map.flyTo({ center: [-15, 40], zoom: 2.7, pitch: 55, duration: 3000});
+  })  
+
+  d3.select("#map_intro").on('stepin', () => {
+    map.flyTo({ center: [-15, 40], zoom: 0.5, pitch: 0, duration: 3000});
+  })  
+    
+    // Going to Harare
+  d3.select("#step2").on('stepin', () => {
+    map.flyTo({ center: [31.050, -17.826], zoom: 8.5, pitch: 45, duration: 3000});
+  })
+
+    // Going to Hormuz
+  d3.select("#step3").on('stepin', () => {
+    map.flyTo({ center: [56.471, 26.594], zoom: 6.5, pitch: 70, duration: 3000});
+  })
+
+    //Fly back out
+  d3.select("#step4").on('stepin', () => {
+    map.flyTo({ center: [15, 40], zoom: 1.5, pitch: 0, duration: 3000});
+  })
+
+    //Cape Kennedy
+  d3.select("#step5").on('stepin', () => {
+    map.flyTo({ center: [-80.607, 28.392], zoom: 4.5, pitch: 10, duration: 3000});
+  })
+
+    
+
+</script>
+
+<!-- LEAVE ALONE, scrolly code goes in the section below -->
+<script>
+    const scroller = scrollama();
+
+	scroller
+		.setup({
+			step: "#scrolly .scrolly-overlay .step",
+			offset: 0.5,
+			debug: false
+		})
+		.onStepEnter(function({ element, index, direction}) {
+			const event = new CustomEvent('stepin', { detail: { direction: direction } })
+			element.dispatchEvent(event);
+		})
+		.onStepExit(function({ element, index, direction }) {
+			const event = new CustomEvent('stepout', { detail: { direction: direction } })
+			element.dispatchEvent(event);
+		});
+
+	window.addEventListener("resize", scroller.resize);
+    </script>
+
+
+<!-- mobile phone warning modal -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const isSmallScreen = window.innerWidth <= 900;
+
+    if (isSmallScreen) {
+      document.getElementById("deviceModal").style.display = "flex";
+    }
+
+    document
+      .getElementById("continueBtn")
+      .addEventListener("click", function () {
+        document.getElementById("deviceModal").style.display = "none";
+      });
+  });
+</script>
+
+<script>
+  const audio = document.getElementById('gemini_audio');
+  const button = document.getElementById('audioTrigger');
+
+  button.addEventListener('click', function() {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  });
+</script>
+
+  </body>
+</html>
